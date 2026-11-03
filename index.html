@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulo 3D desde Cero</title>
+    <title>Módulo Lunar Detallado 3D</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #0b0b1a; }
+        body { margin: 0; overflow: hidden; background-color: #05050d; }
         canvas { display: block; }
     </style>
     <script type="importmap">
@@ -23,7 +23,7 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // 1. Escena, Cámara y Renderizador
+        // Escena, cámara y renderizador
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -31,64 +31,103 @@
         document.body.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        camera.position.set(0, 3, 6);
+        camera.position.set(0, 3, 7);
 
-        // 2. Iluminación
-        const light = new THREE.DirectionalLight(0xffffff, 2);
-        light.position.set(5, 10, 7);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040, 2));
+        // Iluminación espacial
+        const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        sunLight.position.set(10, 10, 10);
+        scene.add(sunLight);
+        scene.add(new THREE.AmbientLight(0x333355, 1));
 
-        // 3. CONSTRUIR EL "MÓDULO LUNAR" DESDE CERO CON FIGURAS BÁSICAS
-        const lunarModule = new THREE.Group();
+        // Grupo principal del Módulo Lunar
+        const lm = new THREE.Group();
 
-        // Materiales (simulando dorado y metal)
-        const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.3 });
-        const silverMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8 });
-        const legMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        // Materiales
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xe6b800, metalness: 0.8, roughness: 0.2 });
+        const silverMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.1 });
+        const darkMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
 
-        // Etapa de descenso (Cuerpo octagonal o cilíndrico)
-        const baseGeom = new THREE.CylinderGeometry(1.2, 1.5, 1, 6);
-        const baseMesh = new THREE.Mesh(baseGeom, goldMaterial);
-        lunarModule.add(baseMesh);
+        // 1. ETAPA DE DESCENSO (Base Octagonal)
+        const baseGeom = new THREE.CylinderGeometry(2, 2.3, 1.2, 8);
+        const base = new THREE.Mesh(baseGeom, goldMat);
+        lm.add(base);
 
-        // Etapa de ascenso (Cabina superior)
-        const cabinGeom = new THREE.BoxGeometry(1.2, 0.8, 1.2);
-        const cabinMesh = new THREE.Mesh(cabinGeom, silverMaterial);
-        cabinMesh.position.y = 0.9;
-        lunarModule.add(cabinMesh);
-
-        // Patas de aterrizaje (Pequeños cilindros inclinados)
+        // 2. PATAS Y PLATOS DE ATERRIZAJE (4 patas)
         for (let i = 0; i < 4; i++) {
-            const legGeom = new THREE.CylinderGeometry(0.05, 0.05, 1.8);
-            const leg = new THREE.Mesh(legGeom, legMaterial);
-            
-            // Posicionar las 4 patas en círculo alrededor de la base
-            const angle = (i * Math.PI) / 2;
-            leg.position.set(Math.cos(angle) * 1.1, -0.5, Math.sin(angle) * 1.1);
-            leg.rotation.z = (i % 2 === 0 ? 0.3 : -0.3);
-            lunarModule.add(leg);
+            const angle = (i * Math.PI / 2) + Math.PI / 4;
+            const legGroup = new THREE.Group();
+
+            // Sostén diagonal
+            const strutGeom = new THREE.CylinderGeometry(0.06, 0.06, 3);
+            const strut = new THREE.Mesh(strutGeom, darkMat);
+            strut.position.set(0, -0.8, 1.2);
+            strut.rotation.x = Math.PI / 4;
+            legGroup.add(strut);
+
+            // Plato de la pata
+            const padGeom = new THREE.CylinderGeometry(0.5, 0.5, 0.08, 12);
+            const pad = new THREE.Mesh(padGeom, goldMat);
+            pad.position.set(0, -1.8, 2.2);
+            legGroup.add(pad);
+
+            legGroup.rotation.y = angle;
+            lm.add(legGroup);
         }
 
-        scene.add(lunarModule);
+        // 3. ETAPA DE ASCENSO (Cabina superior con formas complejas)
+        const cabinMainGroup = new THREE.Group();
+        cabinMainGroup.position.y = 1.3;
 
-        // 4. Animación e interactividad
+        // Centro de la cabina
+        const centerGeom = new THREE.BoxGeometry(1.6, 1.3, 1.6);
+        const centerMesh = new THREE.Mesh(centerGeom, silverMat);
+        cabinMainGroup.add(centerMesh);
+
+        // Ventanas diagonales triangulares/trianguladas
+        const windowMat = new THREE.MeshStandardMaterial({ color: 0x111122, roughness: 0.1 });
+        const winGeom = new THREE.BoxGeometry(0.4, 0.3, 0.05);
+        
+        const winLeft = new THREE.Mesh(winGeom, windowMat);
+        winLeft.position.set(-0.4, 0.2, 0.82);
+        winLeft.rotation.y = -0.2;
+        cabinMainGroup.add(winLeft);
+
+        const winRight = new THREE.Mesh(winGeom, windowMat);
+        winRight.position.set(0.4, 0.2, 0.82);
+        winRight.rotation.y = 0.2;
+        cabinMainGroup.add(winRight);
+
+        // Propulsores RCS (Pequeños conos en los lados)
+        for (let i = 0; i < 4; i++) {
+            const rcsGroup = new THREE.Group();
+            const coneGeom = new THREE.ConeGeometry(0.12, 0.3, 8);
+            
+            const cone = new THREE.Mesh(coneGeom, darkMat);
+            cone.rotation.x = Math.PI / 2;
+            cone.position.z = 0.2;
+            rcsGroup.add(cone);
+
+            rcsGroup.position.set(i % 2 === 0 ? 1 : -1, 0, i < 2 ? 0.8 : -0.8);
+            cabinMainGroup.add(rcsGroup);
+        }
+
+        lm.add(cabinMainGroup);
+        scene.add(lm);
+
+        // Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            lm.rotation.y += 0.003;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // Hacer que el objeto rote lentamente para apreciarlo
-            lunarModule.rotation.y += 0.005;
-
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        animate();
     </script>
 </body>
 </html>
