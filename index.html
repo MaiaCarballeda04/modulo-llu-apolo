@@ -1,0 +1,37 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+// Setup de escena, cámara y renderizador
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Controles para rotar e inspeccionar el modelo con el mouse
+const controls = new OrbitControls(camera, renderer.domElement);
+camera.position.set(0, 2, 5);
+
+// Luz para resaltar los detalles y dorados de la nave
+const light = new THREE.DirectionalLight(0xffffff, 2);
+light.position.set(5, 5, 5);
+scene.add(light);
+scene.add(new THREE.AmbientLight(0x404040, 1.5));
+
+// Cargar el modelo 3D del Módulo Lunar (.glb)
+const loader = new GLTFLoader();
+loader.load('apollo_lunar_module.glb', (gltf) => {
+    const lunarModule = gltf.scene;
+    scene.add(lunarModule);
+}, undefined, (error) => {
+    console.error('Error al cargar el modelo:', error);
+});
+
+// Loop de renderizado
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
+animate();
